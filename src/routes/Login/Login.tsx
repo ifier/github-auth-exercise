@@ -1,25 +1,46 @@
 import React from 'react';
+import { withRouter } from 'react-router';
+import { Dispatch } from 'redux';
+import { connect } from 'react-redux';
+import { FaGithub } from 'react-icons/fa';
+import queryString from 'query-string';
 import {
-  Button,
-  Typography,
   Grid,
   Paper,
-  TextField,
   Divider,
-  Link,
   Box,
-  withStyles
+  withStyles,
+  Button
 } from '@material-ui/core';
 
-import { SocialButton } from '../../components/Buttons/SocialButton';
+import { getOauthCodeEndPoint } from '../../config';
+import { ISessionFetchTokenRequestPayload } from '../../store/session/types';
+import { SessionActions } from '../../store/session/actions';
+import { SignInForm } from './components/SignInForm';
 
 import { styles } from './styles';
 
 interface IProps {
-  classes: any;
+  classes?: any;
+  fetchTokenRequest: (payload: ISessionFetchTokenRequestPayload) => void;
+  history?: any;
+  location?: any;
+  match?: any;
 }
 
+type initialQueryParams = {
+  code: '';
+};
+
 class Login extends React.PureComponent<IProps> {
+  componentDidMount() {
+    const { location, fetchTokenRequest } = this.props;
+    const params = queryString.parse(location.search) as initialQueryParams;
+    if (params.code) {
+      fetchTokenRequest(params);
+    }
+  }
+
   render() {
     const { classes } = this.props;
 
@@ -28,71 +49,24 @@ class Login extends React.PureComponent<IProps> {
         <Grid item xs={false} sm={4} md={8} className={classes.image} />
         <Grid item xs={12} sm={8} md={4} component={Paper} elevation={6} square>
           <div className={classes.paper}>
-            <Typography component="h1" variant="h5">
-              Sign in
-            </Typography>
-            <form className={classes.form}>
-              <TextField
-                variant="outlined"
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-              />
-              <TextField
-                variant="outlined"
-                margin="normal"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-              />
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                color="primary"
-                className={classes.submit}
-                disabled
-              >
-                Sign In
-              </Button>
-              <Grid container>
-                <Grid item xs>
-                  <Link href="#" variant="body2">
-                    Forgot password?
-                  </Link>
-                </Grid>
-                <Grid item>
-                  <Link href="#" variant="body2">
-                    {"Don't have an account? Sign Up"}
-                  </Link>
-                </Grid>
-              </Grid>
-            </form>
+            <SignInForm />
             <Box marginY={1} />
             <Grid container>
               <Grid item xs={12}>
                 <Divider />
               </Grid>
             </Grid>
-            <Box marginY={2}>
-              <SocialButton
-                provider="github"
-                gatekeeper="http://localhost:9999"
-                appId="ca2c4b2be489d377f5cf"
-                redirect="http://localhost:3000/login"
-                onLoginSuccess={(test: any) => {
-                  console.log(test._token);
-                }}
-              >
-                Login with GitHub
-              </SocialButton>
-            </Box>
+            <Box marginY={1} />
+            <Button
+              fullWidth
+              startIcon={<FaGithub />}
+              size="large"
+              color="primary"
+              variant="contained"
+              href={getOauthCodeEndPoint()}
+            >
+              Login with GitHub
+            </Button>
           </div>
         </Grid>
       </Grid>
@@ -100,4 +74,16 @@ class Login extends React.PureComponent<IProps> {
   }
 }
 
-export default withStyles(styles)(Login);
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  fetchTokenRequest: (payload: ISessionFetchTokenRequestPayload) =>
+    dispatch(SessionActions.fetchTokenRequest(payload))
+});
+
+export default withStyles(styles)(
+  withRouter(
+    connect(
+      null,
+      mapDispatchToProps
+    )(Login)
+  )
+);

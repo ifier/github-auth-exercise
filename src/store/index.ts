@@ -9,13 +9,14 @@ import { rootSaga } from './rootSaga';
 export const history = createBrowserHistory();
 
 export const initStore = (initialState = {}) => {
+  const routeMiddleware = routerMiddleware(history);
   const sagaMiddleware = createSagaMiddleware();
+  const middlewares = [sagaMiddleware, routeMiddleware];
 
-  const middlewares = applyMiddleware(routerMiddleware(history), sagaMiddleware);
   const store = createStore(
     rootReducer(history),
     initialState,
-    compose(middlewares)
+    compose(applyMiddleware(...middlewares))
   );
   sagaMiddleware.run(rootSaga);
 

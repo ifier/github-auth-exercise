@@ -61,9 +61,6 @@ function authenticate(code, cb) {
 }
 
 /**
- * Handles logging to the console.
- * Logged values can be sanitized before they are logged
- *
  * @param {string} label - label for the log message
  * @param {Object||string} value - the actual log message, can be a string or a plain object
  * @param {boolean} sanitized - should the value be sanitized before logging?
@@ -96,6 +93,7 @@ app.get('/authenticate/:code', function(req, res) {
   authenticate(req.params.code, function(err, token) {
     let result;
     if ( err || !token ) {
+      console.log(err);
       result = {"error": err || "bad_code"};
       log(result.error);
     } else {
