@@ -1,53 +1,44 @@
 import React from 'react';
-import {
-  Grid,
-  Card,
-  CardMedia,
-  Typography,
-  Button,
-  CardContent,
-  CardActions
-} from '@material-ui/core';
+import { Grid, Typography, Box } from '@material-ui/core';
 
-import { useStyles } from './styles';
+import { RepositoryCard } from './Card';
+import { IRepository } from '../../store/search/types';
 
 interface IProps {
+  items?: IRepository[];
   classes?: any;
+  children?: any;
+  paramsRequiredText?: string;
+  noResultsText?: string;
+  fetchNext?: () => void;
 }
 
-const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+const renderMessage = (message?: string) => {
+  return (
+    <Box p={10} style={{ textAlign: 'center', opacity: 0.5 }}>
+      <Typography variant="h4" color="textSecondary">
+        {message}
+      </Typography>
+    </Box>
+  );
+};
 
 export const CardsList = (props: IProps) => {
-  const classes = useStyles();
+  const { items, paramsRequiredText, noResultsText } = props;
+
+  if (!items) {
+    return renderMessage(paramsRequiredText);
+  }
+
+  if (!items.length) {
+    return renderMessage(noResultsText);
+  }
 
   return (
     <Grid container spacing={2}>
-      {cards.map(card => (
-        <Grid item key={card} xs={12} sm={6} md={3}>
-          <Card className={classes.card}>
-            <CardMedia
-              className={classes.cardMedia}
-              image="https://source.unsplash.com/random"
-              title="Image title"
-            />
-            <CardContent className={classes.cardContent}>
-              <Typography gutterBottom variant="h5" component="h2">
-                Heading
-              </Typography>
-              <Typography>
-                This is a media card. You can use this section to describe the
-                content.
-              </Typography>
-            </CardContent>
-            <CardActions>
-              <Button size="small" color="primary">
-                View
-              </Button>
-              <Button size="small" color="primary">
-                Edit
-              </Button>
-            </CardActions>
-          </Card>
+      {items.map(repository => (
+        <Grid item key={repository.id} xs={12} sm={6} md={3}>
+          <RepositoryCard repository={repository} />
         </Grid>
       ))}
     </Grid>

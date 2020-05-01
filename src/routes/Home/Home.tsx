@@ -1,4 +1,6 @@
 import React from 'react';
+import { Dispatch } from 'redux';
+import { connect } from 'react-redux';
 import {
   Container,
   AppBar,
@@ -8,22 +10,28 @@ import {
   withStyles
 } from '@material-ui/core';
 
-import { SearchInput } from '../../containers/SearchInput';
+import { SearchHeader } from '../../containers/SearchHeader';
 import { CardsList } from '../../components/CardsList';
 
+import { SearchActions } from '../../store/search/actions';
+import { ISearchRequestPayload } from '../../store/search/types';
+import { IRootState } from '../../store/types/state';
+import { SearchSelectors } from '../../store/search/selectors';
 import { styles } from './styles';
 
 interface IProps {
   classes?: any;
+  repositories: any;
+  fetchSearchRequest: (payload: ISearchRequestPayload) => void;
 }
 
-class HomePage extends React.PureComponent<IProps> {
+class Home extends React.PureComponent<IProps> {
   render() {
-    const { classes } = this.props;
+    const { classes, repositories } = this.props;
 
     return (
       <>
-        <AppBar>
+        <AppBar color="transparent">
           <Toolbar className={classes.toolbar}>
             <Typography
               variant="h6"
@@ -31,7 +39,7 @@ class HomePage extends React.PureComponent<IProps> {
               noWrap
               className={classes.companyTitle}
             >
-              Company name
+              Search through repositories
             </Typography>
             <Button color="primary" variant="outlined" className={classes.link}>
               Logout
@@ -42,11 +50,16 @@ class HomePage extends React.PureComponent<IProps> {
         <main>
           <div className={classes.hero}>
             <Container maxWidth="lg">
-              <SearchInput />
+              <SearchHeader />
             </Container>
           </div>
           <Container className={classes.cardGrid} maxWidth="lg">
-            <CardsList />
+            <CardsList
+              items={repositories.items}
+              paramsRequiredText="Name of repository is required"
+              noResultsText="No Results"
+              fetchNext={() => null}
+            />
           </Container>
         </main>
       </>
@@ -54,6 +67,24 @@ class HomePage extends React.PureComponent<IProps> {
   }
 }
 
-const Home = withStyles(styles)(HomePage);
+const mapStateToProps = (state: IRootState) => {
+  const repositories = SearchSelectors.makeGetRepositories(state);
 
-export { Home };
+  return {
+    repositories
+  };
+};
+
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  fetchSearchRequest: (payload: ISearchRequestPayload) =>
+    dispatch(SearchActions.fetchRequest(payload))
+});
+
+export default React.memo(
+  withStyles(styles)(
+    connect(
+      mapStateToProps,
+      mapDispatchToProps
+    )(Home)
+  )
+);

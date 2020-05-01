@@ -10,7 +10,7 @@ import { LoggedInRoute, PrivateRoute } from '../components/Routes';
 import { initStore, history } from '../store';
 import { theme } from '../assets/Theme';
 
-import { Home } from './Home';
+import Home from './Home';
 import Login from './Login';
 import { Page404 } from './404';
 
