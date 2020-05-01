@@ -5,12 +5,13 @@ export interface ISessionFetchTokenRequestPayload {
 }
 
 export interface ISessionFetchTokenResponsePayload {
-  token: string;
-  tokenType: string;
+  access_token: string;
+  scope?: string;
+  token_type: string;
 }
 
 export interface ISessionState {
   error: boolean;
-  token: string;
-  tokenType: string;
+  access_token: string;
+  token_type: string;
 }

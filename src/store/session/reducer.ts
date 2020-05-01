@@ -4,8 +4,8 @@ import { SessionService } from '../../services/session';
 
 const initialState: ISessionState = {
   error: false,
-  token: SessionService.getTokenFromStorage(),
-  tokenType: ''
+  access_token: SessionService.getAccessToken(),
+  token_type: SessionService.getTokenType()
 };
 
 export const sessionReducer = (
@@ -15,13 +15,21 @@ export const sessionReducer = (
   switch (action.type) {
     case SessionActionTypes.FETCH_TOKEN_REQUEST: {
       return {
-        ...state
+        ...state,
+        error: false
       }
     }
     case SessionActionTypes.FETCH_TOKEN_SUCCESS: {
       return {
         ...state,
-        ...action.payload
+        ...action.payload,
+        error: false
+      }
+    }
+    case SessionActionTypes.FETCH_TOKEN_FAILURE: {
+      return {
+        ...state,
+        error: true
       }
     }
     default: {

@@ -8,5 +8,5 @@ const END_POINTS = {
 };
 
 export const getToken = ({ code }: ISessionFetchTokenRequestPayload) => {
-  return axios.post(`${config.oauthTokenUrl}${END_POINTS.getToken}${code}`);
+  return axios.get(`${config.oauthTokenUrl}${END_POINTS.getToken}${code}`);
 };

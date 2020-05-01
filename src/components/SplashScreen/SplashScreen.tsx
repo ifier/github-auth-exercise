@@ -50,7 +50,7 @@ const SplashScreen = (props: any) => {
   }, [isFetching]);
 
   useEffect(() => {
-    if (prevCounter > 0 && counter === 0 && isFetching) {
+    if (prevCounter > 0 && counter === 0) {
       setTimeout(() => {
         setLoaderClass('inactive');
       }, 400);
@@ -59,7 +59,7 @@ const SplashScreen = (props: any) => {
         setShowLoader(false);
       }, 1000);
     }
-  }, [counter, prevCounter, isFetching]);
+  }, [counter, prevCounter]);
 
   if (!showLoader) {
     return null;
