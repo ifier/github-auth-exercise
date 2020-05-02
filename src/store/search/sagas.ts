@@ -1,5 +1,6 @@
 import { call, put, takeEvery } from 'redux-saga/effects';
 import { toast } from 'react-toastify';
+import queryString from 'query-string';
 
 import { history } from '../index';
 import { BasicAction } from '../types/actions';
@@ -8,26 +9,36 @@ import { getRepositories } from './api';
 import { ISearchRequestPayload } from './types';
 import { SessionActions } from '../session/actions';
 
-function* handleUnauthorised() {
-  yield put(SessionActions.fetchLogoutRequest());
-  toast.error('Unauthorized - token has been expired or revoked. Login again please.');
-  history.push('/login');
+function* handleUnauthorised(err: any) {
+  switch (err.response.status) {
+    case 401: {
+      yield put(SessionActions.fetchLogoutRequest());
+      toast.error('Unauthorized - token has been expired or revoked. Login again please.');
+      history.push('/login');
+      break;
+    }
+    case 422: {
+      history.push('/');
+      break;
+    }
+    default: {
+      history.push('/');
+    }
+  }
 }
 
 export function* handleFetchRequest(
   action: BasicAction<ISearchRequestPayload>
 ) {
   try {
+    const routePath = queryString.stringify(action.payload);
+    history.push(`?${routePath}`);
     const res = yield call(getRepositories, action.payload);
     yield put(SearchActions.fetchSuccess(res.data));
   } catch (err) {
     console.log(err.response);
     yield put(SearchActions.fetchFailure());
-
-    // Logout if Token was revoked
-    if (err.response.status === 401) {
-      yield handleUnauthorised();
-    }
+    yield handleUnauthorised(err);
   }
 }
 
@@ -40,11 +51,7 @@ export function* handleFetchNextPageRequest(
   } catch (err) {
     console.log(err.response);
     yield put(SearchActions.fetchNextPageFailure());
-
-    // Logout if Token was revoked
-    if (err.response.status === 401) {
-      yield handleUnauthorised();
-    }
+    yield handleUnauthorised(err);
   }
 }
 

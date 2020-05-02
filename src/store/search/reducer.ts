@@ -1,3 +1,4 @@
+import { union } from 'lodash';
 import { SearchActions, SearchActionTypes } from './actions';
 import { ISearchState } from './types';
 
@@ -45,7 +46,7 @@ export const searchReducer = (
         ...state,
         repositories: {
           ...action.payload,
-          items: [...oldItems, ...action.payload.items]
+          items: union([...oldItems, ...action.payload.items])
         },
         isFetchingNext: false,
         error: false

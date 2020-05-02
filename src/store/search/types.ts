@@ -1,10 +1,12 @@
-export interface ISearchRequestPayload {
+export interface IParams {
   q: string;
   sort?: string;
   order?: string;
   per_page?: number;
   page: number;
 }
+
+export interface ISearchRequestPayload extends IParams {}
 
 export interface ISearchResponsePayload {
   incomplete_results: boolean;

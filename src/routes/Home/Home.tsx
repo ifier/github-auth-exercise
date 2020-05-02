@@ -40,7 +40,7 @@ class Home extends React.PureComponent<IProps> {
         <main>
           <div className={classes.hero}>
             <Container maxWidth={false}>
-              <SearchHeader />
+              <SearchHeader {...this.props} />
             </Container>
           </div>
           <div className={classes.main}>

@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { ReactText } from 'react';
+import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
+import { withRouter, RouteComponentProps } from 'react-router';
 import { debounce } from 'lodash';
+import queryString from 'query-string';
 import {
   TextField,
   Grid,
@@ -8,23 +11,66 @@ import {
   Select,
   MenuItem
 } from '@material-ui/core';
-import { Dispatch } from 'redux';
 
-import { ISearchRequestPayload, ISearchState } from '../../store/search/types';
+import { IParams, ISearchRequestPayload } from '../../store/search/types';
 import { SearchActions } from '../../store/search/actions';
-import { IRootState } from '../../store/types/state';
-import { SearchSelectors } from '../../store/search/selectors';
+import { history } from '../../store';
 
-interface IProps extends ISearchState {
+interface IProps extends RouteComponentProps {
   classes?: any;
+  params: IParams;
+  isFetching: boolean;
+  isFetchingNext: boolean;
   onInputChangeDebounced?: any;
   fetchSearchRequest: (payload: ISearchRequestPayload) => void;
 }
 
-class SearchHeader extends React.Component<IProps> {
+interface IState {
+  name: string | number | ReactText[];
+}
+
+class SearchHeader extends React.Component<IProps, IState> {
+  state = {
+    name: ''
+  };
+
+  componentDidMount() {
+    const {
+      location: { search }
+    } = this.props;
+
+    if (search) {
+      this.fetchSearch(search);
+    }
+  }
+
+  componentDidUpdate(prevProps: Readonly<IProps>) {
+    const {
+      location: { search },
+      isFetching
+    } = this.props;
+
+    if (search && search !== prevProps.location.search && !isFetching) {
+      this.fetchSearch(search);
+    }
+  }
+
+  fetchSearch = (search: string) => {
+    const { params, fetchSearchRequest } = this.props;
+    const queryParams = queryString.parse(search, { parseNumbers: true });
+    if (queryParams.q) {
+      fetchSearchRequest({
+        ...params,
+        ...queryParams
+      });
+      this.setState({ name: queryParams.q });
+    }
+  };
+
   onInputChange = (event: any) => {
     event.persist();
     this.onInputChangeDebounced(event);
+    this.setState({ name: event.target.value });
   };
 
   onInputChangeDebounced = debounce(event => {
@@ -39,6 +85,7 @@ class SearchHeader extends React.Component<IProps> {
 
   render() {
     const { params, isFetching, isFetchingNext } = this.props;
+    const { name } = this.state;
     const disableInput = isFetching || isFetchingNext;
 
     return (
@@ -48,6 +95,7 @@ class SearchHeader extends React.Component<IProps> {
             fullWidth
             variant="outlined"
             label="Name of repository"
+            value={name}
             placeholder="Start typing..."
             onChange={this.onInputChange}
             disabled={disableInput}
@@ -79,22 +127,14 @@ class SearchHeader extends React.Component<IProps> {
   }
 }
 
-const mapStateToProps = (state: IRootState) => {
-  const searchState = SearchSelectors.makeGetState(state);
-
-  return {
-    ...searchState
-  };
-};
-
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   fetchSearchRequest: (payload: ISearchRequestPayload) =>
     dispatch(SearchActions.fetchRequest(payload))
 });
 
-export default React.memo(
+export default withRouter(
   connect(
-    mapStateToProps,
+    null,
     mapDispatchToProps
   )(SearchHeader)
 );
