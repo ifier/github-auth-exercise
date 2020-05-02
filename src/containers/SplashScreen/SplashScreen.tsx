@@ -13,15 +13,11 @@ const useStyles = makeStyles(theme => ({
     bottom: 0,
     left: 0,
     zIndex: 9999,
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    backgroundColor: 'rgba(0, 0, 0, 0.95)',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    opacity: 1,
-    '&.inactive': {
-      transition: 'opacity 0.8s',
-      opacity: 0
-    }
+    opacity: 1
   },
   progress: {
     margin: theme.spacing(2)

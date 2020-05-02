@@ -8,30 +8,31 @@ import { SearchHeader } from '../../containers/SearchHeader';
 import { CardsList } from '../../components/CardsList';
 
 import { SearchActions } from '../../store/search/actions';
-import { ISearchRequestPayload } from '../../store/search/types';
+import {
+  ISearchRequestPayload,
+  ISearchState,
+  ISearchNextPageRequestPayload
+} from '../../store/search/types';
 import { IRootState } from '../../store/types/state';
 import { SearchSelectors } from '../../store/search/selectors';
 import { styles } from './styles';
 
-interface IProps {
+interface IProps extends ISearchState {
   classes?: any;
-  repositories: any;
-  isFetching: boolean;
-  isFetchingNext: boolean;
   fetchSearchRequest: (payload: ISearchRequestPayload) => void;
-  fetchSearchNextPageRequest: (payload: any) => void;
+  fetchSearchNextPageRequest: (payload: ISearchNextPageRequestPayload) => void;
 }
 
 class Home extends React.PureComponent<IProps> {
   render() {
     const {
       classes,
+      params,
       repositories,
       isFetching,
       isFetchingNext,
       fetchSearchNextPageRequest
     } = this.props;
-    console.log(this.props);
 
     return (
       <>
@@ -49,10 +50,12 @@ class Home extends React.PureComponent<IProps> {
             <Container className={classes.cardGrid} maxWidth={false}>
               <CardsList
                 list={repositories}
+                params={params}
                 paramsRequiredText="Name of repository field is required"
                 noResultsText="No Results"
                 fetchNextPage={fetchSearchNextPageRequest}
                 isFetchingNext={isFetchingNext}
+                onClick={() => {}}
               />
             </Container>
           </div>
@@ -73,7 +76,7 @@ const mapStateToProps = (state: IRootState) => {
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   fetchSearchRequest: (payload: ISearchRequestPayload) =>
     dispatch(SearchActions.fetchRequest(payload)),
-  fetchSearchNextPageRequest: (payload: any) =>
+  fetchSearchNextPageRequest: (payload: ISearchNextPageRequestPayload) =>
     dispatch(SearchActions.fetchNextPageRequest(payload))
 });
 

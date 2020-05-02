@@ -2,9 +2,11 @@ import { SearchActions, SearchActionTypes } from './actions';
 import { ISearchState } from './types';
 
 const initialState: ISearchState = {
-  params: { q: '' },
+  params: { q: '', page: 1 },
   error: false,
-  repositories: {},
+  repositories: {
+    total_count: 0
+  },
   isFetching: false,
   isFetchingNext: false
 };
@@ -29,11 +31,31 @@ export const searchReducer = (
         isFetching: false,
       }
     }
+    case SearchActionTypes.FETCH_NEXT_PAGE_REQUEST: {
+      return {
+        ...state,
+        params: action.payload,
+        isFetchingNext: true,
+        error: false
+      }
+    }
+    case SearchActionTypes.FETCH_NEXT_PAGE_SUCCESS: {
+      const oldItems = state.repositories.items ? state.repositories.items : [];
+      return {
+        ...state,
+        repositories: {
+          ...action.payload,
+          items: [...oldItems, ...action.payload.items]
+        },
+        isFetchingNext: false,
+        error: false
+      }
+    }
+    case SearchActionTypes.FETCH_NEXT_PAGE_FAILURE:
     case SearchActionTypes.FETCH_FAILURE: {
       return {
         ...state,
         error: true,
-        repositories: initialState.repositories,
         isFetching: false,
       }
     }

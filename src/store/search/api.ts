@@ -11,7 +11,7 @@ const END_POINTS = {
 
 export const getRepositories = (params: ISearchRequestPayload) => {
   const headers = getHeaders(SessionService.getAccessToken());
-  console.log(params);
+  // console.log(params);
 
   return axios.get(
     `${config.githubApi}${END_POINTS.getRepositories}`,

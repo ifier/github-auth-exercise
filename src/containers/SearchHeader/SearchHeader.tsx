@@ -32,7 +32,8 @@ class SearchHeader extends React.Component<IProps> {
     const { value } = event.target;
     fetchSearchRequest({
       ...params,
-      q: value
+      q: value,
+      page: 1
     });
   }, 300);
 

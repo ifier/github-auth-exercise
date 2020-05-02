@@ -3,6 +3,7 @@ export interface ISearchRequestPayload {
   sort?: string;
   order?: string;
   per_page?: number;
+  page: number;
 }
 
 export interface ISearchResponsePayload {
@@ -11,14 +12,20 @@ export interface ISearchResponsePayload {
   total_count: number;
 }
 
-export interface ISearchNextPageRequestPayload {
+export interface ISearchNextPageRequestPayload extends ISearchRequestPayload {
   page: number;
+}
+
+export interface IRepositoriesState {
+  items?: IRepository[];
+  incomplete_results?: boolean;
+  total_count: number;
 }
 
 export interface ISearchState {
   params: ISearchRequestPayload;
   error: boolean;
-  repositories: ISearchResponsePayload | { items?: [] };
+  repositories: IRepositoriesState;
   isFetching: boolean;
   isFetchingNext: boolean;
 }

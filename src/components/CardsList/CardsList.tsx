@@ -1,49 +1,58 @@
-import React, { useCallback } from 'react';
-import InfiniteScroll from 'react-infinite-scroll-component';
+import React from 'react';
+import { debounce } from 'lodash';
+import InfiniteScroll from 'react-infinite-scroller';
 import { Grid, Typography, Box, CircularProgress } from '@material-ui/core';
 
 import { RepositoryCard } from './Card';
-import { ISearchResponsePayload } from '../../store/search/types';
+import {
+  IRepositoriesState,
+  ISearchRequestPayload,
+  ISearchNextPageRequestPayload
+} from '../../store/search/types';
 
 interface IProps {
-  list: ISearchResponsePayload;
-  classes?: any;
-  children?: any;
+  list: IRepositoriesState;
+  params: ISearchRequestPayload;
+  fetchNextPage: (payload: ISearchNextPageRequestPayload) => void;
+  isFetchingNext: boolean;
   paramsRequiredText?: string;
   noResultsText?: string;
-  fetchNextPage: (payload: any) => void;
-  isFetchingNext?: boolean;
+  classes?: any;
+  children?: any;
+  onClick?: () => void;
 }
 
-export const CardsList = (props: IProps) => {
-  const { list, paramsRequiredText, noResultsText, fetchNextPage } = props;
-  const { items, total_count } = list;
+export class CardsList extends React.Component<IProps> {
+  fetchNextPageRequest = debounce(() => {
+    const { fetchNextPage, params, isFetchingNext } = this.props;
 
-  const fetchNextPageRequest = useCallback(() => {
-    fetchNextPage({});
-  }, []);
+    if (!isFetchingNext) {
+      fetchNextPage({
+        ...params,
+        page: params.page + 1
+      });
+    }
+  }, 300);
 
-  if (!items) {
-    return <Message message={paramsRequiredText} />;
-  }
+  render() {
+    const { list, paramsRequiredText, noResultsText } = this.props;
+    const { items, total_count } = list;
 
-  if (!items.length) {
-    return <Message message={noResultsText} />;
-  }
+    if (!items) {
+      return <Message message={paramsRequiredText} />;
+    }
 
-  return (
-    <div>
+    if (!items.length) {
+      return <Message message={noResultsText} />;
+    }
+
+    return (
       <InfiniteScroll
-        style={{ overflow: 'hidden' }}
-        next={fetchNextPageRequest}
+        pageStart={1}
+        loadMore={this.fetchNextPageRequest}
         hasMore={items.length < total_count}
-        loader={Spinner()}
-        endMessage={
-          <p style={{ textAlign: 'center' }}>
-            <b>Yay! You have seen it all</b>
-          </p>
-        }
-        dataLength={total_count}
+        loader={<Spinner key="spinner" />}
+        threshold={150}
       >
         <Grid container spacing={4}>
           {items.map(repository => (
@@ -53,9 +62,9 @@ export const CardsList = (props: IProps) => {
           ))}
         </Grid>
       </InfiniteScroll>
-    </div>
-  );
-};
+    );
+  }
+}
 
 const Message = ({ message }: { message?: string }) => {
   return (
