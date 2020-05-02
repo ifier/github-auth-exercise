@@ -1,10 +1,12 @@
 import { call, put, takeEvery } from 'redux-saga/effects';
-// import { toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 
+import { history } from '../index';
 import { BasicAction } from '../types/actions';
 import { SearchActions, SearchActionTypes } from './actions';
 import { getRepositories } from './api';
 import { ISearchRequestPayload } from './types';
+import { SessionActions } from '../session/actions';
 
 export function* handleFetchRequest(
   action: BasicAction<ISearchRequestPayload>
@@ -16,7 +18,13 @@ export function* handleFetchRequest(
   } catch (err) {
     console.log(err.response);
     yield put(SearchActions.fetchFailure());
-    // toast.error('error');
+
+    // Logout if Token was revoked
+    if (err.response.status === 401) {
+      yield put(SessionActions.fetchLogoutRequest());
+      toast.error('Unauthorized - token has been expired or revoked. Login again please.');
+      history.push('/login');
+    }
   }
 }
 

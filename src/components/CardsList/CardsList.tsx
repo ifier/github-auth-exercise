@@ -1,19 +1,63 @@
-import React from 'react';
-import { Grid, Typography, Box } from '@material-ui/core';
+import React, { useCallback } from 'react';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import { Grid, Typography, Box, CircularProgress } from '@material-ui/core';
 
 import { RepositoryCard } from './Card';
-import { IRepository } from '../../store/search/types';
+import { ISearchResponsePayload } from '../../store/search/types';
 
 interface IProps {
-  items?: IRepository[];
+  list: ISearchResponsePayload;
   classes?: any;
   children?: any;
   paramsRequiredText?: string;
   noResultsText?: string;
-  fetchNext?: () => void;
+  fetchNextPage: (payload: any) => void;
+  isFetchingNext?: boolean;
 }
 
-const renderMessage = (message?: string) => {
+export const CardsList = (props: IProps) => {
+  const { list, paramsRequiredText, noResultsText, fetchNextPage } = props;
+  const { items, total_count } = list;
+
+  const fetchNextPageRequest = useCallback(() => {
+    fetchNextPage({});
+  }, []);
+
+  if (!items) {
+    return <Message message={paramsRequiredText} />;
+  }
+
+  if (!items.length) {
+    return <Message message={noResultsText} />;
+  }
+
+  return (
+    <div>
+      <InfiniteScroll
+        style={{ overflow: 'hidden' }}
+        next={fetchNextPageRequest}
+        hasMore={items.length < total_count}
+        loader={Spinner()}
+        endMessage={
+          <p style={{ textAlign: 'center' }}>
+            <b>Yay! You have seen it all</b>
+          </p>
+        }
+        dataLength={total_count}
+      >
+        <Grid container spacing={4}>
+          {items.map(repository => (
+            <Grid item key={repository.id} xs={12} sm={6} md={3}>
+              <RepositoryCard repository={repository} />
+            </Grid>
+          ))}
+        </Grid>
+      </InfiniteScroll>
+    </div>
+  );
+};
+
+const Message = ({ message }: { message?: string }) => {
   return (
     <Box p={10} style={{ textAlign: 'center', opacity: 0.5 }}>
       <Typography variant="h4" color="textSecondary">
@@ -23,24 +67,10 @@ const renderMessage = (message?: string) => {
   );
 };
 
-export const CardsList = (props: IProps) => {
-  const { items, paramsRequiredText, noResultsText } = props;
-
-  if (!items) {
-    return renderMessage(paramsRequiredText);
-  }
-
-  if (!items.length) {
-    return renderMessage(noResultsText);
-  }
-
+const Spinner = () => {
   return (
-    <Grid container spacing={2}>
-      {items.map(repository => (
-        <Grid item key={repository.id} xs={12} sm={6} md={3}>
-          <RepositoryCard repository={repository} />
-        </Grid>
-      ))}
-    </Grid>
+    <Box pt={5} pb={1} style={{ textAlign: 'center' }}>
+      <CircularProgress />
+    </Box>
   );
 };

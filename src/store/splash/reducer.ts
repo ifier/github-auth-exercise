@@ -19,10 +19,11 @@ export const splashReducer = (
       }
     }
     case SplashActionTypes.SPLASH_SCREEN_HIDE: {
+      const counter = state.counter - 1 < 0 ? 0 : state.counter - 1;
       return {
         ...state,
-        counter: state.counter - 1 < 0 ? 0 : state.counter - 1,
-        isFetching: state.counter !== 0
+        counter,
+        isFetching: counter !== 0
       }
     }
     default: {

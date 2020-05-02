@@ -24,10 +24,15 @@ const getTokenType = () => {
   return token?.token_type || '';
 };
 
+const removeTokenFromStorage = () => {
+  localStorage.removeItem('token');
+};
+
 export const SessionService = {
   getAccessToken,
   getTokenFromStorage,
   setTokenToStorage,
   getTokenType,
-  isAuthenticated
+  isAuthenticated,
+  removeTokenFromStorage
 };

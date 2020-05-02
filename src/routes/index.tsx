@@ -5,7 +5,7 @@ import { ConnectedRouter } from 'connected-react-router';
 import { CssBaseline, MuiThemeProvider } from '@material-ui/core';
 import { ToastContainer } from 'react-toastify';
 
-import { SplashScreen } from '../components/SplashScreen';
+import { SplashScreen } from '../containers/SplashScreen';
 import { LoggedInRoute, PrivateRoute } from '../components/Routes';
 import { initStore, history } from '../store';
 import { theme } from '../assets/Theme';

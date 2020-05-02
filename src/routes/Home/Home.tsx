@@ -1,15 +1,9 @@
 import React from 'react';
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
-import {
-  Container,
-  AppBar,
-  Toolbar,
-  Typography,
-  Button,
-  withStyles
-} from '@material-ui/core';
+import { Container, withStyles, LinearProgress } from '@material-ui/core';
 
+import { Header } from '../../containers/Header';
 import { SearchHeader } from '../../containers/SearchHeader';
 import { CardsList } from '../../components/CardsList';
 
@@ -22,45 +16,46 @@ import { styles } from './styles';
 interface IProps {
   classes?: any;
   repositories: any;
+  isFetching: boolean;
+  isFetchingNext: boolean;
   fetchSearchRequest: (payload: ISearchRequestPayload) => void;
+  fetchSearchNextPageRequest: (payload: any) => void;
 }
 
 class Home extends React.PureComponent<IProps> {
   render() {
-    const { classes, repositories } = this.props;
+    const {
+      classes,
+      repositories,
+      isFetching,
+      isFetchingNext,
+      fetchSearchNextPageRequest
+    } = this.props;
+    console.log(this.props);
 
     return (
       <>
-        <AppBar color="transparent">
-          <Toolbar className={classes.toolbar}>
-            <Typography
-              variant="h6"
-              color="inherit"
-              noWrap
-              className={classes.companyTitle}
-            >
-              Search through repositories
-            </Typography>
-            <Button color="primary" variant="outlined" className={classes.link}>
-              Logout
-            </Button>
-          </Toolbar>
-        </AppBar>
-        <Toolbar />
+        <Header />
         <main>
           <div className={classes.hero}>
-            <Container maxWidth="lg">
+            <Container maxWidth={false}>
               <SearchHeader />
             </Container>
           </div>
-          <Container className={classes.cardGrid} maxWidth="lg">
-            <CardsList
-              items={repositories.items}
-              paramsRequiredText="Name of repository is required"
-              noResultsText="No Results"
-              fetchNext={() => null}
-            />
-          </Container>
+          <div className={classes.main}>
+            {isFetching && (
+              <LinearProgress className={classes.linearProgress} />
+            )}
+            <Container className={classes.cardGrid} maxWidth={false}>
+              <CardsList
+                list={repositories}
+                paramsRequiredText="Name of repository field is required"
+                noResultsText="No Results"
+                fetchNextPage={fetchSearchNextPageRequest}
+                isFetchingNext={isFetchingNext}
+              />
+            </Container>
+          </div>
         </main>
       </>
     );
@@ -68,16 +63,18 @@ class Home extends React.PureComponent<IProps> {
 }
 
 const mapStateToProps = (state: IRootState) => {
-  const repositories = SearchSelectors.makeGetRepositories(state);
+  const searchState = SearchSelectors.makeGetState(state);
 
   return {
-    repositories
+    ...searchState
   };
 };
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   fetchSearchRequest: (payload: ISearchRequestPayload) =>
-    dispatch(SearchActions.fetchRequest(payload))
+    dispatch(SearchActions.fetchRequest(payload)),
+  fetchSearchNextPageRequest: (payload: any) =>
+    dispatch(SearchActions.fetchNextPageRequest(payload))
 });
 
 export default React.memo(

@@ -32,6 +32,13 @@ export const sessionReducer = (
         error: true
       }
     }
+    case SessionActionTypes.FETCH_LOGOUT_SUCCESS: {
+      return {
+        ...state,
+        access_token: '',
+        token_type: ''
+      }
+    }
     default: {
       return state;
     }

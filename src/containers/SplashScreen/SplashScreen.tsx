@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { connect } from 'react-redux';
-import { makeStyles, CircularProgress } from '@material-ui/core';
+import { makeStyles, CircularProgress, Backdrop } from '@material-ui/core';
+
 import { SplashSelectors } from '../../store/splash/selectors';
 import { IRootState } from '../../store/types/state';
 
@@ -12,7 +13,7 @@ const useStyles = makeStyles(theme => ({
     bottom: 0,
     left: 0,
     zIndex: 9999,
-    backgroundColor: 'rgba(0, 0, 0, 1)',
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -39,41 +40,35 @@ const usePrevious = (value: any) => {
 
 const SplashScreen = (props: any) => {
   const { counter, isFetching } = props;
-  // console.log(isFetching);
   const [showLoader, setShowLoader] = useState(false);
-  const [loaderClass, setLoaderClass] = useState('');
   const prevCounter = usePrevious(counter);
   const classes = useStyles();
 
   useEffect(() => {
-    setShowLoader(isFetching);
+    if (isFetching) setShowLoader(isFetching);
   }, [isFetching]);
 
   useEffect(() => {
     if (prevCounter > 0 && counter === 0) {
       setTimeout(() => {
-        setLoaderClass('inactive');
-      }, 400);
-      setTimeout(() => {
-        setLoaderClass('');
         setShowLoader(false);
       }, 1000);
     }
   }, [counter, prevCounter]);
 
-  if (!showLoader) {
-    return null;
-  }
-
   return (
-    <div className={`${classes.page} ${loaderClass}`}>
+    <Backdrop
+      open={showLoader}
+      transitionDuration={{ exit: 1000 }}
+      className={classes.page}
+    >
       <CircularProgress
         size={120}
         thickness={0.7}
         color="secondary"
         className={classes.progress}
       />
-    </div>
+    </Backdrop>
   );
 };
 

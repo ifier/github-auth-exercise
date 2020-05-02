@@ -22,8 +22,6 @@ interface IProps extends ISearchState {
 }
 
 class SearchHeader extends React.Component<IProps> {
-  // private onInputChangeDebounced: (event: any) => void;
-
   onInputChange = (event: any) => {
     event.persist();
     this.onInputChangeDebounced(event);
@@ -32,7 +30,6 @@ class SearchHeader extends React.Component<IProps> {
   onInputChangeDebounced = debounce(event => {
     const { params, fetchSearchRequest } = this.props;
     const { value } = event.target;
-    // console.log(params);
     fetchSearchRequest({
       ...params,
       q: value
@@ -42,17 +39,18 @@ class SearchHeader extends React.Component<IProps> {
   render() {
     const { params, isFetching, isFetchingNext } = this.props;
     const disableInput = isFetching || isFetchingNext;
-    // console.log(this.props);
 
     return (
-      <Grid container spacing={2} alignItems="center" justify="space-between">
+      <Grid container spacing={4} alignItems="center" justify="space-between">
         <Grid item xs={8} md={5}>
           <TextField
             fullWidth
             variant="outlined"
+            label="Name of repository"
             placeholder="Start typing..."
             onChange={this.onInputChange}
             disabled={disableInput}
+            autoFocus
           />
         </Grid>
         <Grid item>
