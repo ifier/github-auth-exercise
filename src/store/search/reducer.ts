@@ -52,8 +52,15 @@ export const searchReducer = (
         error: false
       }
     }
-    case SearchActionTypes.FETCH_NEXT_PAGE_FAILURE:
     case SearchActionTypes.FETCH_FAILURE: {
+      return {
+        ...state,
+        error: true,
+        isFetching: false,
+        repositories: initialState.repositories
+      }
+    }
+    case SearchActionTypes.FETCH_NEXT_PAGE_FAILURE: {
       return {
         ...state,
         error: true,
