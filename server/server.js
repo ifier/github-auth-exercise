@@ -4,10 +4,27 @@ const qs = require('querystring');
 const express = require('express');
 const app = express();
 
-
 const TRUNCATE_THRESHOLD = 10;
 const REVEALED_CHARS = 3;
 const REPLACEMENT = '***';
+
+/**
+ * @param {string} label - label for the log message
+ * @param {Object||string} value - the actual log message, can be a string or a plain object
+ * @param {boolean} sanitized - should the value be sanitized before logging?
+ */
+function log(label = '', value = '', sanitized = false) {
+  value = value || '';
+  if (sanitized) {
+    if (typeof(value) === 'string' && value.length > TRUNCATE_THRESHOLD){
+      console.log(label, value.substring(REVEALED_CHARS, 0) + REPLACEMENT);
+    } else {
+      console.log(label, REPLACEMENT);
+    }
+  } else {
+    console.log(label, value);
+  }
+}
 
 // Load config defaults from JSON file.
 // Environment variables override defaults.
@@ -32,25 +49,6 @@ function authenticate(code) {
   return axios.post('https://github.com/login/oauth/access_token', data);
 }
 
-/**
- * @param {string} label - label for the log message
- * @param {Object||string} value - the actual log message, can be a string or a plain object
- * @param {boolean} sanitized - should the value be sanitized before logging?
- */
-function log(label = '', value = '', sanitized = false) {
-  value = value || '';
-  if (sanitized) {
-    if (typeof(value) === 'string' && value.length > TRUNCATE_THRESHOLD){
-      console.log(label, value.substring(REVEALED_CHARS, 0) + REPLACEMENT);
-    } else {
-      console.log(label, REPLACEMENT);
-    }
-  } else {
-    console.log(label, value);
-  }
-}
-
-
 // Convenience for allowing CORS on routes - GET only
 app.all('*', function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
@@ -61,8 +59,15 @@ app.all('*', function (req, res, next) {
 
 
 app.get('/authenticate/:code', function(req, res) {
-  log('authenticating code:', req.params.code, true);
-  authenticate(req.params.code)
+  const { code } = req.params;
+  log('authenticating code:', code, true);
+  const data = {
+    client_id: config.oauth_client_id,
+    client_secret: config.oauth_client_secret,
+    code
+  };
+
+  axios.post('https://github.com/login/oauth/access_token', data)
     .then(response => {
       const parsedData = qs.parse(response.data);
       if (parsedData.access_token) {
@@ -76,6 +81,15 @@ app.get('/authenticate/:code', function(req, res) {
     })
     .catch(err => {
       res.status(500).json(err);
+    });
+});
+
+app.get('/repository/:owner/:repo', function(req, res) {
+  const { owner, repo } = req.params;
+
+  axios.get(`https://github.com/${owner}/${repo}`)
+    .then(response => {
+      res.send(response.data);
     });
 });
 

@@ -19,9 +19,28 @@ export const useStyles = makeStyles((theme) => ({
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
+    '&:hover': {
+      '& $cardMedia:after': {
+        opacity: 1
+      }
+    }
   },
   cardMedia: {
     paddingTop: '56.25%', // 16:9
+    position: 'relative',
+    cursor: 'pointer',
+    '&:after': {
+      content: '""',
+      background: 'rgba(255, 255, 255, 0.6)',
+      opacity: 0,
+      transition: 'opacity 0.3s',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 500
+    }
   },
   cardContent: {
     flexGrow: 1,

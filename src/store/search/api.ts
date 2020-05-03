@@ -24,3 +24,7 @@ export const getRepositories = (params: ISearchRequestPayload) => {
     }
   );
 };
+
+export const getPage = (url: string) => {
+  return axios.get(`${config.oauthTokenUrl}repository/${url}`);
+};
