@@ -1,6 +1,6 @@
 export const config = {
-  clientId: 'c7af81e99f248ad294b6',
-  clientSecret: 'ee1a8f44f2f6c96ac604e1a92f28303e85dda04a',
+  clientId: '',
+  clientSecret: '',
   githubApi: 'https://api.github.com',
   oauthPort: 443,
   oauthCodeUrl: 'https://github.com/login/oauth/authorize',
