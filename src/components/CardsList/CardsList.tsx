@@ -47,21 +47,28 @@ export class CardsList extends React.Component<IProps> {
     }
 
     return (
-      <InfiniteScroll
-        pageStart={1}
-        loadMore={this.fetchNextPageRequest}
-        hasMore={items.length < total_count}
-        loader={<Spinner key="spinner" />}
-        threshold={150}
-      >
-        <Grid container spacing={4}>
-          {items.map(repository => (
-            <Grid item key={repository.id} xs={12} sm={6} md={3}>
-              <RepositoryCard repository={repository} />
-            </Grid>
-          ))}
-        </Grid>
-      </InfiniteScroll>
+      <>
+        <Box mb={4}>
+          <Typography variant="body2">
+            Total count: <b>{total_count}</b>
+          </Typography>
+        </Box>
+        <InfiniteScroll
+          pageStart={1}
+          loadMore={this.fetchNextPageRequest}
+          hasMore={items.length < total_count}
+          loader={<Spinner key="spinner" />}
+          threshold={150}
+        >
+          <Grid container spacing={4}>
+            {items.map(repository => (
+              <Grid item key={repository.id} xs={12} sm={6} md={3}>
+                <RepositoryCard repository={repository} />
+              </Grid>
+            ))}
+          </Grid>
+        </InfiniteScroll>
+      </>
     );
   }
 }

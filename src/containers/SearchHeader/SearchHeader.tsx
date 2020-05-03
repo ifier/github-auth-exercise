@@ -14,7 +14,6 @@ import {
 
 import { IParams, ISearchRequestPayload } from '../../store/search/types';
 import { SearchActions } from '../../store/search/actions';
-import { history } from '../../store';
 
 interface IProps extends RouteComponentProps {
   classes?: any;
@@ -25,13 +24,20 @@ interface IProps extends RouteComponentProps {
   fetchSearchRequest: (payload: ISearchRequestPayload) => void;
 }
 
+interface IFilters {
+  sort?: string;
+  order?: string;
+}
+
 interface IState {
   name: string | number | ReactText[];
+  filters: string | IFilters | string[] | number;
 }
 
 class SearchHeader extends React.Component<IProps, IState> {
   state = {
-    name: ''
+    name: '',
+    filters: 0
   };
 
   componentDidMount() {
@@ -55,6 +61,11 @@ class SearchHeader extends React.Component<IProps, IState> {
     }
   }
 
+  /**
+   * This function handles initial search when link was shared
+   * or browser back button was clicked
+   * @param search
+   */
   fetchSearch = (search: string) => {
     const { params, fetchSearchRequest } = this.props;
     const queryParams = queryString.parse(search, { parseNumbers: true });
@@ -64,13 +75,18 @@ class SearchHeader extends React.Component<IProps, IState> {
         ...queryParams
       });
       this.setState({ name: queryParams.q });
+
+      const { sort, order } = queryParams;
+      if (sort && order) {
+        this.setState({ filters: [String(sort), String(order)] });
+      }
     }
   };
 
   onInputChange = (event: any) => {
     event.persist();
     this.onInputChangeDebounced(event);
-    this.setState({ name: event.target.value });
+    this.setState({ name: event.target.value, filters: 0 });
   };
 
   onInputChangeDebounced = debounce(event => {
@@ -79,13 +95,35 @@ class SearchHeader extends React.Component<IProps, IState> {
     fetchSearchRequest({
       ...params,
       q: value,
+      sort: undefined,
+      order: undefined,
       page: 1
     });
-  }, 300);
+  }, 500);
+
+  onFiltersChanges = (e: any) => {
+    const { params, fetchSearchRequest } = this.props;
+    const { value }: { value: string } = e.target;
+    let filters = { sort: undefined, order: undefined } as IFilters;
+
+    if (value) {
+      const { 0: sort, 1: order } = value.split(',');
+      filters = { sort, order };
+      this.setState({ filters: [sort, order] });
+    } else {
+      this.setState({ filters: 0 });
+    }
+
+    fetchSearchRequest({
+      ...params,
+      ...filters,
+      page: 1
+    });
+  };
 
   render() {
     const { params, isFetching, isFetchingNext } = this.props;
-    const { name } = this.state;
+    const { name, filters } = this.state;
     const disableInput = isFetching || isFetchingNext;
 
     return (
@@ -100,6 +138,7 @@ class SearchHeader extends React.Component<IProps, IState> {
             onChange={this.onInputChange}
             disabled={disableInput}
             autoFocus
+            InputLabelProps={{ shrink: true }}
           />
         </Grid>
         <Grid item>
@@ -109,15 +148,17 @@ class SearchHeader extends React.Component<IProps, IState> {
             </Grid>
             <Grid item>
               <Select
+                name="filters"
                 variant="outlined"
-                value={''}
+                value={filters}
                 disabled={!params.q || disableInput}
+                onChange={this.onFiltersChanges}
               >
-                <MenuItem value="">None</MenuItem>
-                <MenuItem value={['stars', 'desc']}>Most stars</MenuItem>
-                <MenuItem value={['stars', 'asc']}>Fewest stars</MenuItem>
-                <MenuItem value={['forks', 'desc']}>Most forks</MenuItem>
-                <MenuItem value={['forks', 'asc']}>Fewest forks</MenuItem>
+                <MenuItem value={0}>Best Match</MenuItem>
+                <MenuItem value="stars,desc">Most stars</MenuItem>
+                <MenuItem value="stars,asc">Fewest stars</MenuItem>
+                <MenuItem value="forks,desc">Most forks</MenuItem>
+                <MenuItem value="forks,asc">Fewest forks</MenuItem>
               </Select>
             </Grid>
           </Grid>

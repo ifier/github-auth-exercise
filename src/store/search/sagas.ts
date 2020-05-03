@@ -31,10 +31,10 @@ export function* handleFetchRequest(
   action: BasicAction<ISearchRequestPayload>
 ) {
   try {
-    const routePath = queryString.stringify(action.payload);
-    history.push(`?${routePath}`);
     const res = yield call(getRepositories, action.payload);
     yield put(SearchActions.fetchSuccess(res.data));
+    const routePath = queryString.stringify(action.payload);
+    history.push(`?${routePath}`);
   } catch (err) {
     console.log(err.response);
     yield put(SearchActions.fetchFailure());
